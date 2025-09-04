@@ -20,7 +20,7 @@ Installation
 
 Download or clone the repository:
 
-git clone https://github.com/yourusername/GuildBankLogger.git
+git clone https://github.com/MarshallJD1/GBL-MoP-Classic---Guild-Bank-Logger.git
 
 
 Copy the GuildBankLogger folder into your WoW AddOns directory:
