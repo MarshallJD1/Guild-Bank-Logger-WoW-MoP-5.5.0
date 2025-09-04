@@ -1,0 +1,131 @@
+GuildBankLogger Addon – Installation & Usage Instructions
+Installation
+
+Download the Addon
+
+Make sure you have the latest version of the GuildBankLogger addon folder.
+
+Locate Your WoW Addons Folder
+
+Path (Windows example):
+
+C:\Program Files (x86)\World of Warcraft\_classic_\Interface\AddOns\
+
+
+For WoW Retail or other versions, replace _classic_ with your appropriate folder.
+
+Copy Addon Folder
+
+Place the entire GuildBankLogger folder into the AddOns directory.
+
+The folder should contain .toc, .lua, and any other addon files.
+
+Enable Addon in Game
+
+Launch World of Warcraft.
+
+On the Character Select Screen, click AddOns (bottom-left).
+
+Ensure GuildBankLogger is checked.
+
+Usage
+
+Open Guild Bank
+
+The addon logs all deposits and withdrawals automatically.
+
+View Logs
+
+Type /gbl show in chat to open the Summary Window.
+
+The window will show a tab-delimited table with:
+
+Date | Player | GoldDeposit | GoldWithdraw | Item | ItemDeposit | ItemWithdraw
+
+
+Copy Logs to Excel
+
+Highlight all text in the Summary Window.
+
+Press Ctrl+C (Windows) or Cmd+C (Mac).
+
+Paste into your Excel sheet for further processing.
+
+Excel Overview Sheet Setup
+
+Create a new sheet called Overview.
+
+Columns:
+
+Player | TotalGoldDeposited | TotalGoldWithdrawn | TotalItemsDeposited | TotalItemsWithdrawn | ContributionPoints | Status | Raids | AdjustedPoints
+
+Formulas
+
+Total Gold Deposited (example in B2)
+
+=SUMIF(GuildBankLogs!B:B, A2, GuildBankLogs!C:C)
+
+
+A2 is the player name on the Overview sheet.
+
+Total Gold Withdrawn (example in C2)
+
+=SUMIF(GuildBankLogs!B:B, A2, GuildBankLogs!D:D)
+
+
+Total Items Deposited (example in D2)
+
+=SUMIF(GuildBankLogs!B:B, A2, GuildBankLogs!F:F)
+
+
+Total Items Withdrawn (example in E2)
+
+=SUMIF(GuildBankLogs!B:B, A2, GuildBankLogs!G:G)
+
+
+Contribution Points (example in F2)
+
+= (B2/100*2 + D2*0.25) - (C2/100*2 + E2*0.25)
+
+
+Handles gold in 100g chunks and items in stacks, giving 2 points per 100g deposited/withdrawn, 0.25 per item.
+
+Status (example in G2)
+
+=IF(F2>0,"Green",IF(F2=0,"Yellow","Red"))
+
+
+This can be later replaced with conditional formatting for color-coding.
+
+Raids Column (example in H2)
+
+Input manually or pull from a separate sheet logging raids.
+
+Adjusted Points (example in I2)
+
+=F2 - (H2*5)
+
+
+Subtract 5 points per raid as a penalty or tweak as desired.
+
+Conditional Formatting for Status
+
+Select column Status.
+
+Go to Home → Conditional Formatting → New Rule → Format only cells that contain.
+
+Set rules:
+
+"Green" → Fill Green
+
+"Yellow" → Fill Yellow
+
+"Red" → Fill Red
+
+Notes
+
+Stack sizes are automatically handled by using the ItemDeposit and ItemWithdraw totals.
+
+Contribution points reflect both gold and items.
+
+Adjust raid penalties based on your guild’s fair system.
