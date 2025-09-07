@@ -1,0 +1,5 @@
+# Path to your SavedVariables Lua file
+SAVED_VARIABLES_PATH=C:\Program Files\WoW\World of Warcraft\_classic_\WTF\Account\123456456\SavedVariables\GuildBankLogger.lua
+
+# Path to your CSV export (this CSV will be created if it doesn’t exist)
+CSV_PATH=C:\Program Files\WoW\World of Warcraft\_classic_\Interface\Addons\GuildBankLogger\GuildBankLogs.csv

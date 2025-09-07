@@ -1,0 +1,67 @@
+GuildBankLogger – Setup & Usage Guide - Mists of Pandaria - 5.5.0
+==================================================================
+
+1. INSTALL
+----------
+- Place the `GuildBankLogger` folder into your WoW AddOns directory:
+  World of Warcraft\_classic_\Interface\AddOns\GuildBankLogger\
+
+- Inside the folder you should see:
+  - GuildBankLogger.lua (the addon code)
+  - GuildBankLogger.toc (addon metadata)
+  - UpdateGBLExport.exe (log exporter tool)
+  - config.txt (where you set file paths)
+  - GuildBankLogs.csv (blank log file, will fill over time)
+  - Instructions.txt (this file)
+
+
+2. CONFIGURE
+------------
+- Open `config.txt` in Notepad.
+- Change the following values:
+
+  SAVED_VARIABLES_PATH = Path to your WoW SavedVariables file
+    Example:
+    C:\Program Files\WoW\_classic_\WTF\Account\123456789#1\SavedVariables\GuildBankLogger.lua
+
+  CSV_PATH = Path to your GuildBankLogs.csv
+    Example:
+    C:\Program Files\WoW\_classic_\Interface\AddOns\GuildBankLogger\GuildBankLogs.csv
+
+- Save and close `config.txt`.
+
+
+3. WORKFLOW
+-----------
+- Log into WoW.
+- Open the Guild Bank.
+  (Addon will automatically scan all tabs + money log).
+- Type `/gblscanall` if you want to force a scan.
+- Exit the game.
+- Double-click `UpdateGBLExport.exe` to update your GuildBankLogs.csv.
+- ✅ Done! Your CSV is now ready to open in Google Sheets or Excel.
+
+
+4. GOOGLE SHEETS / EXCEL
+------------------------
+- **Google Sheets**:
+  - Open Google Sheets → File → Import → Upload → choose `GuildBankLogs.csv`.
+  - Select "Replace data at selected cell".
+  - Re-import whenever you update the CSV.
+
+- **Excel**:
+  - Simply open `GuildBankLogs.csv` directly.
+  - It updates each time you run `UpdateGBLExport.exe`.
+
+
+5. OPTIONAL SYNC
+----------------
+- Host `GuildBankLogs.csv` on Google Drive/Dropbox/OneDrive.
+- Share the linked Google Sheet with guildmates for live updates.
+
+
+6. SLASH COMMANDS (in-game)
+---------------------------
+- /gblscanall       → Scan all guild bank logs (auto when bank is opened).
+- /gbl clear        → Clear all stored data and reset index counter.
+- /gbl exportreset  → Reset export string only (testing use).
