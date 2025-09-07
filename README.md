@@ -30,8 +30,8 @@ Includes a one-click `.exe` exporter that writes logs into a CSV, ready for Goog
 
 1. Log into WoW.  
 2. Open the Guild Bank.  
-- Addon auto-scans all tabs + money log.  
-- You can also run `/gblscanall` to force a scan.  
+ - Open The Money Log/Tab1 Log
+ - '/gbl scan' On each of the log pages. 
 3. Exit the game.  
 4. Double-click `UpdateGBLExport.exe`.  
 - Updates `GuildBankLogs.csv` with any new transactions.  
