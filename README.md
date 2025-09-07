@@ -1,96 +1,87 @@
-GuildBankLogger
+# GuildBankLogger For Mists of Pandaria 5.5.0
 
-Track your guild bank activity and player contributions in WoW Classic & MoP Classic with ease.
+A World of Warcraft Mists of Pandaria Classic addon + export tool to track guild bank deposits, withdrawals, and gold transactions.  
+Includes a one-click `.exe` exporter that writes logs into a CSV, ready for Google Sheets or Excel.
 
-Features
+---
 
-Tracks gold and item deposits/withdrawals per player.
+## 📦 Contents
+- `GuildBankLogger.lua` – Addon code  
+- `GuildBankLogger.toc` – Addon metadata  
+- `UpdateGBLExport.exe` – Exporter tool (Windows, no Python needed)  
+- `config.txt` – Paths configuration file  
+- `GuildBankLogs.csv` – Blank CSV (will fill over time)  
+- `Instructions.txt` – Quick setup guide  
 
-Calculates contribution points based on gold/items deposited and withdrawn.
+---
 
-Supports stacked materials in MoP Classic.
+## 🚀 Setup
 
-Status indicator for players (green/yellow/red) based on contributions.
+1. Copy the **GuildBankLogger** folder into:"World of Warcraft_classic_\Interface\AddOns\"
+2. Open `config.txt` and update:
+- `SAVED_VARIABLES_PATH` → path to your `GuildBankLogger.lua` SavedVariables file.
+- `CSV_PATH` → path to your `GuildBankLogs.csv` (usually inside the addon folder).
 
-Copy-paste summary straight into Excel, with automatic calculations on a separate Overview sheet.
+3. Launch WoW and enable **GuildBankLogger** in your AddOns list.
 
-Optional adjustment for raid attendance (subtract points per raid).
+---
 
-Installation
+## 🔄 Workflow
 
-Download or clone the repository:
+1. Log into WoW.  
+2. Open the Guild Bank.  
+- Addon auto-scans all tabs + money log.  
+- You can also run `/gblscanall` to force a scan.  
+3. Exit the game.  
+4. Double-click `UpdateGBLExport.exe`.  
+- Updates `GuildBankLogs.csv` with any new transactions.  
+5. Open the CSV in **Google Sheets** or **Excel**.  
+- In Google Sheets: `File → Import → Upload CSV`.  
+- In Excel: open the CSV directly.  
 
-git clone https://github.com/MarshallJD1/GBL-MoP-Classic---Guild-Bank-Logger.git
+---
+
+## 📊 Sharing Logs
+
+- Sync `GuildBankLogs.csv` with Google Drive/Dropbox/OneDrive.  
+- Link it into Google Sheets for live sharing with guildmates.  
+- All entries have a unique index, so no duplicates across sessions.  
+
+---
+
+## ⚙️ Commands
+
+- `/gblscanall` → Scan all logs (also happens automatically).  
+- `/gbl clear` → Wipe stored data + reset index.  
+- `/gbl exportreset` → Reset export string only.  
+
+---
+
+## 🛠 Development
+
+- Built with Lua (WoW API) + Python exporter.  
+- Packaged with PyInstaller for no-dependency `.exe`.  
+
+---
+
+## 📄 Using Your Logs in Google Sheets
+
+You can easily view your guild bank logs in Google Sheets with your exported CSV.
+
+1. Upload your `GuildBankLogs.csv` to **Google Drive**.  
+2. Right-click the file → **Share → Anyone with the link** → set as **Viewer**.  
+3. Copy the **file ID** from the share link.  
+   - Example link:  
+     ```
+     https://drive.google.com/file/d/1AbCDEfgHiJKlMnOPQrsTuvWXyz/view?usp=sharing
+     ```
+   - File ID: `1AbCDEfgHiJKlMnOPQrsTuvWXyz`
+4. In a Google Sheet, paste the following formula into cell A1:  
+   ```excel
+   =IMPORTDATA("https://drive.google.com/uc?export=download&id=YOUR_FILE_ID_HERE")
 
 
-Copy the GuildBankLogger folder into your WoW AddOns directory:
+## ✨ Credits
 
-World of Warcraft\_classic_\Interface\AddOns\
+Created by MarshallJD and various AI Tools for tracking guild bank logs in WoW Mists of Pandaria Classic.  
 
-
-Reload your UI in-game (/reload) or restart WoW.
-
-Usage
-
-Open the addon in-game with /gbl.
-
-Log transactions when depositing or withdrawing gold and items from the guild bank.
-
-Click Export Summary to copy the summary text to your clipboard.
-
-Open Excel:
-
-Paste the text into the GuildBankLogs sheet.
-
-The Overview sheet will automatically calculate:
-
-Total gold deposited/withdrawn
-
-Total items deposited/withdrawn (stack-aware)
-
-Contribution points
-
-Status color (conditional formatting in Excel)
-
-Adjust contribution points or raid penalties if desired:
-
-2 points per 100g deposited/withdrawn
-
-0.25 points per item deposited/withdrawn
-
-Subtract points per raid for attendance (optional)
-
-Excel Sheets
-
-GuildBankLogs: raw log data pasted from the addon.
-
-Date | Player | GoldDeposit | GoldWithdraw | Item | ItemDeposit | ItemWithdraw
-
-
-Overview: automatically calculated totals, contribution points, raid penalties, and status.
-
-Contribution System
-Action	Points
-100g gold deposited	+2
-100g gold withdrawn	-2
-Item deposited (any stack)	+0.25/item
-Item withdrawn (any stack)	-0.25/item
-Raid attendance penalty	-5 or -10
-
-Status Rules:
-
-Positive points → Green
-
-Zero points → Yellow
-
-Negative points → Red
-
-(Status uses Excel conditional formatting for colors.)
-
-Support & Issues
-
-If you encounter issues or have suggestions, please open a GitHub issue.
-
-License
-
-MIT License. Free to use, modify, and distribute.
