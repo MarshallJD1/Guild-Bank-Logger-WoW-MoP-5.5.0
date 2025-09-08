@@ -35,8 +35,9 @@ GuildBankLogger – Setup & Usage Guide - Mists of Pandaria - 5.5.0
 -----------
 - Log into WoW.
 - Open the Guild Bank.
-  (Addon will automatically scan all tabs + money log).
-- Type `/gblscanall` if you want to force a scan.
+- View the Log of a tab and '/gbl scan'
+- repeat for all tabs and the Money log
+- type ' /gbl export'
 - Exit the game.
 - Double-click `UpdateGBLExport.exe` to update your GuildBankLogs.csv.
 - ✅ Done! Your CSV is now ready to open in Google Sheets or Excel.

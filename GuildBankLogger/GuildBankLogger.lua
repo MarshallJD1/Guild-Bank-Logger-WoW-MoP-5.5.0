@@ -68,23 +68,36 @@ local function AddEntry(entry)
 end
 
 -- Generate the full export string (tab-separated)
+
 function UpdateExportString()
     local text = "Player\tType\tGold_G\tGold_S\tGold_C\tItem\tCount\tTimestamp\tIndex\tTab\n"
     for _, entry in ipairs(GBL_Data) do
-        local typeStr, g, s, c, itemName, count = "-", 0, 0, 0, "-", 0
-        if entry.gold then
+        local typeStr = "-"
+        local gd, gs, gc = 0, 0, 0
+        local itemName, count = "-", 0
+
+        -- Gold entries
+        if entry.gold and entry.gold ~= 0 then
             typeStr = entry.action == "deposit" and "Gold Deposit" or "Gold Withdraw"
-            g, s, c = entry.gold, entry.silver or 0, entry.copper or 0
+
+            -- Convert total copper into G/S/C
+            local total = tonumber(entry.gold) or 0
+            gd = math.floor(total / 10000)
+            gs = math.floor((total % 10000) / 100)
+            gc = total % 100
+
+        -- Item entries
         elseif entry.item and entry.item ~= "" then
             typeStr = entry.action == "deposit" and "Item Deposit" or "Item Withdraw"
-            itemName, count = entry.item, entry.count
+            itemName = entry.item
+            count = entry.count or 0
         end
 
         text = text .. string.format(
             "%s\t%s\t%d\t%d\t%d\t%s\t%d\t%s\t%d\t%s\n",
             entry.player or "-",
             typeStr,
-            g, s, c,
+            gd, gs, gc,
             itemName,
             count,
             entry.time or "-",
@@ -95,6 +108,8 @@ function UpdateExportString()
     GBL_Export = text
 end
 
+
+
 -- Show scan confirmation
 local function PrintResult(tabName, newCount, skippedCount)
     print(string.format("GBL: %s scanned! %d new, %d skipped.", tabName, newCount, skippedCount))
@@ -104,6 +119,7 @@ end
 -- Scan current log
 ----------------------------------------------------------
 
+-- Scan the current guild bank log
 local function ScanCurrentLog()
     if not GuildBankFrame or not GuildBankFrame:IsVisible() then
         print("GBL: Guild bank must be open to scan.")
@@ -114,7 +130,6 @@ local function ScanCurrentLog()
     local logType, tabName
     local newCount, skippedCount = 0, 0
 
-    -- Money log?
     if GuildBankFrame.mode == "moneylog" then
         logType = "MONEY"
         tabName = "Money Log"
@@ -130,7 +145,12 @@ local function ScanCurrentLog()
                     amount = amount or 0,
                     gold = amount or 0,
                 }
-                if AddEntry(entry) then newCount = newCount + 1 else skippedCount = skippedCount + 1 end
+
+                if AddEntry(entry) then
+                    newCount = newCount + 1
+                else
+                    skippedCount = skippedCount + 1
+                end
             end
         end
     else
@@ -148,7 +168,12 @@ local function ScanCurrentLog()
                     item = itemLink,
                     count = count or 0,
                 }
-                if AddEntry(entry) then newCount = newCount + 1 else skippedCount = skippedCount + 1 end
+
+                if AddEntry(entry) then
+                    newCount = newCount + 1
+                else
+                    skippedCount = skippedCount + 1
+                end
             end
         end
     end
