@@ -69,7 +69,7 @@ end
 
 -- Generate the full export string (tab-separated)
 function UpdateExportString()
-    local text = "Player\tType\tGold_G\tGold_S\tGold_C\tItem\tCount\tTimestamp\tIndex\n"
+    local text = "Player\tType\tGold_G\tGold_S\tGold_C\tItem\tCount\tTimestamp\tIndex\tTab\n"
     for _, entry in ipairs(GBL_Data) do
         local typeStr, g, s, c, itemName, count = "-", 0, 0, 0, "-", 0
         if entry.gold then
@@ -81,14 +81,15 @@ function UpdateExportString()
         end
 
         text = text .. string.format(
-            "%s\t%s\t%d\t%d\t%d\t%s\t%d\t%s\t%d\n",
+            "%s\t%s\t%d\t%d\t%d\t%s\t%d\t%s\t%d\t%s\n",
             entry.player or "-",
             typeStr,
             g, s, c,
             itemName,
             count,
             entry.time or "-",
-            entry.index or -1
+            entry.index or -1,
+            entry.tab or "MONEY"
         )
     end
     GBL_Export = text
