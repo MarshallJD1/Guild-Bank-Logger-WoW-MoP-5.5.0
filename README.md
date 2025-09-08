@@ -7,7 +7,9 @@ Includes a one-click `.exe` exporter that writes logs into a CSV, ready for Goog
 
 ## 📦 Contents
 - `GuildBankLogger.lua` – Addon code  
-- `GuildBankLogger.toc` – Addon metadata  
+- `GuildBankLogger.toc` – Addon metadata
+
+  Tools needed, download at "" and empty folder contents into the GuildBankLogger addon folder. 
 - `UpdateGBLExport.exe` – Exporter tool (Windows, no Python needed)  
 - `config.txt` – Paths configuration file  
 - `GuildBankLogs.csv` – Blank CSV (will fill over time)  
@@ -17,11 +19,10 @@ Includes a one-click `.exe` exporter that writes logs into a CSV, ready for Goog
 
 ## 🚀 Setup
 
-1. Copy the **GuildBankLogger** folder into:"World of Warcraft_classic_\Interface\AddOns\"
+1. Copy the GuildBankLogger and the GBL tools("") contents folder into:"World of Warcraft_classic_\Interface\AddOns\" 
 2. Open `config.txt` and update:
 - `SAVED_VARIABLES_PATH` → path to your `GuildBankLogger.lua` SavedVariables file.
-- `CSV_PATH` → path to your `GuildBankLogs.csv` (usually inside the addon folder).
-
+- `CSV_PATH` → path to your `GuildBankLogs.csv` (Wherever you just placed the empty file).
 3. Launch WoW and enable **GuildBankLogger** in your AddOns list.
 
 ---
