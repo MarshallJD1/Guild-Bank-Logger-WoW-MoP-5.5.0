@@ -1,6 +1,9 @@
 # GuildBankLogger For Mists of Pandaria 5.5.0
 
 A World of Warcraft Mists of Pandaria Classic addon + export tool to track guild bank deposits, withdrawals, and gold transactions.  
+
+***GBLTOOLS IS NEEDED FOR THE ONE CLICK EXE TO EXPORT YOUR DATA INTO A CSV @ "https://github.com/MarshallJD1/GBLTools"***
+
 Includes a one-click `.exe` exporter that writes logs into a CSV, ready for Google Sheets or Excel.
 
 ---
@@ -9,7 +12,7 @@ Includes a one-click `.exe` exporter that writes logs into a CSV, ready for Goog
 - `GuildBankLogger.lua` – Addon code  
 - `GuildBankLogger.toc` – Addon metadata
 
-  Tools needed, download at "" and empty folder contents into the GuildBankLogger addon folder. 
+  Tools needed, download at "https://github.com/MarshallJD1/GBLTools" and empty folder contents into the GuildBankLogger addon folder. 
 - `UpdateGBLExport.exe` – Exporter tool (Windows, no Python needed)  
 - `config.txt` – Paths configuration file  
 - `GuildBankLogs.csv` – Blank CSV (will fill over time)  
@@ -19,7 +22,7 @@ Includes a one-click `.exe` exporter that writes logs into a CSV, ready for Goog
 
 ## 🚀 Setup
 
-1. Copy the GuildBankLogger and the GBL tools("") contents folder into:"World of Warcraft_classic_\Interface\AddOns\" 
+1. Copy the GuildBankLogger and the GBL tools("https://github.com/MarshallJD1/GBLTools") contents folder into:"World of Warcraft_classic_\Interface\AddOns\" 
 2. Open `config.txt` and update:
 - `SAVED_VARIABLES_PATH` → path to your `GuildBankLogger.lua` SavedVariables file.
 - `CSV_PATH` → path to your `GuildBankLogs.csv` (Wherever you just placed the empty file).
@@ -53,9 +56,8 @@ Includes a one-click `.exe` exporter that writes logs into a CSV, ready for Goog
 
 ## ⚙️ Commands
 
-- `/gblscanall` → Scan all logs (also happens automatically).  
-- `/gbl clear` → Wipe stored data + reset index.  
-- `/gbl exportreset` → Reset export string only.  
+- `/gbl scan` → Scan whatever log is being viewed currently.   
+- `/gbl export` →  export data ready for python exe only.  
 
 ---
 
