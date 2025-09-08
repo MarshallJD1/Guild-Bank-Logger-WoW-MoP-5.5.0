@@ -84,4 +84,5 @@ You can easily view your guild bank logs in Google Sheets with your exported CSV
 ## ✨ Credits
 
 Created by MarshallJD and various AI Tools for tracking guild bank logs in WoW Mists of Pandaria Classic.  
+<a href="https://www.flaticon.com/free-icons/log" title="log icons">Log icons created by Freepik - Flaticon</a> for use of icon 
 
