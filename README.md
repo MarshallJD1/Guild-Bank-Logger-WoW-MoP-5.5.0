@@ -1,92 +1,72 @@
-# GuildBankLogger For Mists of Pandaria 5.5.0
+GuildBankLogger (MoP Classic 5.5.0)
 
-A World of Warcraft Mists of Pandaria Classic addon + export tool to track guild bank deposits, withdrawals, and gold transactions.  
+A World of Warcraft Mists of Pandaria Classic addon to track guild bank deposits, withdrawals, and gold transactions.
 
-***GBLTOOLS IS NEEDED FOR THE ONE CLICK EXE TO EXPORT YOUR DATA INTO A CSV @ "https://github.com/MarshallJD1/GBLTools"***
+Exports your logs directly in-game into a spreadsheet-ready format (Google Sheets / Excel).
+No external tools or executables required. 🎉
 
-Includes a one-click `.exe` exporter that writes logs into a CSV, ready for Google Sheets or Excel.
+📦 Contents
 
----
+GuildBankLogger.lua – Addon code
 
-## 📦 Contents
-- `GuildBankLogger.lua` – Addon code  
-- `GuildBankLogger.toc` – Addon metadata
+GuildBankLogger.toc – Addon metadata
 
-  Tools needed, download at "https://github.com/MarshallJD1/GBLTools" and empty folder contents into the GuildBankLogger addon folder. 
-- `UpdateGBLExport.exe` – Exporter tool (Windows, no Python needed)  
-- `config.txt` – Paths configuration file  
-- `GuildBankLogs.csv` – Blank CSV (will fill over time)  
-- `Instructions.txt` – Quick setup guide  
+🚀 Installation
 
----
+Download or clone this repo.
 
-## 🚀 Setup
+Place the GuildBankLogger folder into your WoW AddOns directory:
 
-1. Copy the GuildBankLogger and the GBL tools("https://github.com/MarshallJD1/GBLTools") contents folder into:"World of Warcraft_classic_\Interface\AddOns\" 
-2. Open `config.txt` and update:
-- `SAVED_VARIABLES_PATH` → path to your `GuildBankLogger.lua` SavedVariables file.
-- `CSV_PATH` → path to your `GuildBankLogs.csv` (Wherever you just placed the empty file).
-3. Launch WoW and enable **GuildBankLogger** in your AddOns list.
-
----
-
-## 🔄 Workflow
-
-1. Log into WoW.  
-2. Open the Guild Bank.  
- - Open The Money Log/Tab1 Log
- - '/gbl scan' On each of the log pages.
- - After all tabs scanned '/gbl export' 
-3. Exit the game.  
-4. Double-click `UpdateGBLExport.exe`.  
-- Updates `GuildBankLogs.csv` with any new transactions.  
-5. Open the CSV in **Google Sheets** or **Excel**.  
-- In Google Sheets: `File → Import → Upload CSV`.  
-- In Excel: open the CSV directly.  
-
----
-
-## 📊 Sharing Logs
-
-- Sync `GuildBankLogs.csv` with Google Drive/Dropbox/OneDrive.  
-- Link it into Google Sheets for live sharing with guildmates.  
-- All entries have a unique index, so no duplicates across sessions.  
-
----
-
-## ⚙️ Commands
-
-- `/gbl scan` → Scan whatever log is being viewed currently.   
-- `/gbl export` →  export data ready for python exe only.  
-
----
-
-## 🛠 Development
-
-- Built with Lua (WoW API) + Python exporter.  
-- Packaged with PyInstaller for no-dependency `.exe`.  
-
----
-
-## 📄 Using Your Logs in Google Sheets
-
-You can easily view your guild bank logs in Google Sheets with your exported CSV.
-
-1. Upload your `GuildBankLogs.csv` to **Google Drive**.  
-2. Right-click the file → **Share → Anyone with the link** → set as **Viewer**.  
-3. Copy the **file ID** from the share link.  
-   - Example link:  
-     ```
-     https://drive.google.com/file/d/1AbCDEfgHiJKlMnOPQrsTuvWXyz/view?usp=sharing
-     ```
-   - File ID: `1AbCDEfgHiJKlMnOPQrsTuvWXyz`
-4. In a Google Sheet, paste the following formula into cell A1:  
-   ```excel
-   =IMPORTDATA("https://drive.google.com/uc?export=download&id=YOUR_FILE_ID_HERE")
+World of Warcraft\_classic_\Interface\AddOns\
 
 
-## ✨ Credits
+Launch WoW and enable GuildBankLogger in your AddOns list.
 
-Created by MarshallJD and various AI Tools for tracking guild bank logs in WoW Mists of Pandaria Classic.  
-<a href="https://www.flaticon.com/free-icons/log" title="log icons">Log icons created by Freepik - Flaticon</a> for use of icon 
+🔄 Workflow
 
+Log into WoW.
+
+Open the Guild Bank.
+
+Go to the Money Log or any Tab Log.
+
+Run /gbl scan on each visible log page.
+
+When finished, run /gbl export.
+
+A window will appear containing all exportable data in tab-separated format.
+
+Copy & paste this into Google Sheets or Excel.
+
+📊 Sharing Logs
+
+Paste the export into a shared Google Sheet for guild-wide tracking.
+
+All entries include a unique index to avoid duplicates across sessions.
+
+⚙️ Commands
+
+/gbl scan → Scan the currently visible log (tab or money).
+
+/gbl export → Open a window with spreadsheet-ready export text.
+
+📄 Using with Google Sheets
+
+Open a new Google Sheet.
+
+Paste the exported data into the sheet.
+
+Format as needed (freeze header row, apply filters, etc.).
+
+🛠 Development
+
+Written in Lua using the WoW API.
+
+Data stored in SavedVariables for persistence.
+
+Export window created via standard WoW UI API.
+
+✨ Credits
+
+Created by MarshallJD with the help of AI-assisted coding tools.
+<a href="https://www.flaticon.com/free-icons/log" title="log icons">Log icons created by Freepik - Flaticon</a>
