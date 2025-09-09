@@ -1,9 +1,6 @@
-GuildBankLogger (MoP Classic 5.5.0)
+GuildBankLogger for Mists of Pandaria 5.5.0
 
-A World of Warcraft Mists of Pandaria Classic addon to track guild bank deposits, withdrawals, and gold transactions.
-
-Exports your logs directly in-game into a spreadsheet-ready format (Google Sheets / Excel).
-No external tools or executables required. 🎉
+A World of Warcraft Mists of Pandaria Classic addon to track guild bank deposits, withdrawals, and gold transactions — fully in-game with copyable export window.
 
 📦 Contents
 
@@ -11,62 +8,73 @@ GuildBankLogger.lua – Addon code
 
 GuildBankLogger.toc – Addon metadata
 
-🚀 Installation
+🚀 Setup
 
-Download or clone this repo.
+Copy the GuildBankLogger folder into:
 
-Place the GuildBankLogger folder into your WoW AddOns directory:
-
-World of Warcraft\_classic_\Interface\AddOns\
+World of Warcraft_classic_\Interface\AddOns\
 
 
 Launch WoW and enable GuildBankLogger in your AddOns list.
 
-🔄 Workflow
+Log into your character and open the Guild Bank.
 
-Log into WoW.
+🔄 Workflow
 
 Open the Guild Bank.
 
-Go to the Money Log or any Tab Log.
+Navigate to the Money Log or a Tab log.
 
-Run /gbl scan on each visible log page.
+Run /gbl scan to log the currently visible transactions.
 
-When finished, run /gbl export.
+Repeat for all tabs/money log pages.
 
-A window will appear containing all exportable data in tab-separated format.
+Run /gbl export to open the in-game export window.
 
-Copy & paste this into Google Sheets or Excel.
+Copy the export text and paste it into your GuildBankLogs.csv (or directly into Google Sheets/Excel).
 
-📊 Sharing Logs
+📊 Export Format
 
-Paste the export into a shared Google Sheet for guild-wide tracking.
+Player
 
-All entries include a unique index to avoid duplicates across sessions.
+Type (Gold Deposit / Gold Withdraw / Item Deposit / Item Withdraw)
+
+Gold Deposit (G, S, C)
+
+Gold Withdraw (G, S, C)
+
+Item
+
+Count
+
+Timestamp (YYYY-MM-DD HH:00)
+
+Index (unique transaction ID)
+
+Tab
+
+All transactions are logged individually, even if multiple identical items/gold occur in the same hour. Reloading the UI will not duplicate entries.
 
 ⚙️ Commands
 
-/gbl scan → Scan the currently visible log (tab or money).
+/gbl scan → Scan the currently visible tab or money log
 
-/gbl export → Open a window with spreadsheet-ready export text.
-
-📄 Using with Google Sheets
-
-Open a new Google Sheet.
-
-Paste the exported data into the sheet.
-
-Format as needed (freeze header row, apply filters, etc.).
+/gbl export → Open in-game export window (copy CSV-ready text)
 
 🛠 Development
 
-Written in Lua using the WoW API.
+Built with Lua and WoW API
 
-Data stored in SavedVariables for persistence.
+Deduplication uses Blizzard transaction IDs for reliability
 
-Export window created via standard WoW UI API.
+Works fully in-game — no external tools required
+
+📄 Using Your Logs in Google Sheets
+
+Copy the exported CSV text into a .csv file (or paste directly into a Google Sheet).
+
 
 ✨ Credits
 
-Created by MarshallJD with the help of AI-assisted coding tools.
-<a href="https://www.flaticon.com/free-icons/log" title="log icons">Log icons created by Freepik - Flaticon</a>
+Created by MarshallJD
+For tracking guild bank logs in WoW Mists of Pandaria Classic.
