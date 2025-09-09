@@ -18,13 +18,12 @@ GBL_SeenKeys = GBL_SeenKeys or {} -- fast lookup for duplicates
 local function MakeKey(entry)
     return table.concat({
         entry.tab or "MONEY",
-        entry.time or "0",
+        entry.lineID or 0,
         entry.player or "UNKNOWN",
         entry.action or "??",
         entry.item or entry.currency or entry.gold or "NONE",
         entry.count or 0,
         entry.amount or 0,
-        entry.lineID or 0,  -- ensures identical items in same hour are unique
     }, "|")
 end
 
@@ -42,6 +41,22 @@ local function AddEntry(entry)
     table.insert(GBL_Data, entry)
     return true
 end
+
+-- Rebuild seen keys from saved data (prevents duplicates across sessions)
+local function RebuildSeenKeys()
+    GBL_SeenKeys = {}
+    for _, entry in ipairs(GBL_Data) do
+        local key = MakeKey(entry)
+        GBL_SeenKeys[key] = true
+    end
+end
+
+-- Automatically rebuild keys on login
+local f = CreateFrame("Frame")
+f:RegisterEvent("PLAYER_LOGIN")
+f:SetScript("OnEvent", function()
+    RebuildSeenKeys()
+end)
 
 ----------------------------------------------------------
 -- Generate the full export string (tab-separated)
@@ -223,3 +238,4 @@ SlashCmdList["GBL"] = function(msg)
         print("  /gbl export -> Show export window (copy CSV)")
     end
 end
+print("GuildBankLogger loaded! Type /gbl for commands.")
