@@ -24,6 +24,7 @@ local function MakeKey(entry)
         entry.item or entry.currency or entry.gold or "NONE",
         entry.count or 0,
         entry.amount or 0,
+        entry.time or "NOTIME",
     }, "|")
 end
 
