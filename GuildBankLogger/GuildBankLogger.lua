@@ -1,7 +1,6 @@
 -- ######################################################
--- GuildBankLogger (Persistent Deduplication)
+-- GuildBankLogger (Fixed MoP Classic Deduplication)
 -- Logs guild bank deposits, withdrawals, and gold transactions
--- Scans the currently visible guild bank log (tab or money log)
 -- ######################################################
 
 -- Saved variables
@@ -14,25 +13,27 @@ GBL_SeenKeys = GBL_SeenKeys or {} -- fast lookup for duplicates
 -- Helpers
 ----------------------------------------------------------
 
--- Generate a unique key for each transaction
+-- Generate a unique key from actual transaction details
 local function MakeKey(entry)
-    return table.concat({
+    -- Using tab, player, item/gold, count/amount, action, and scan line
+    -- Line number ensures multiple identical deposits are recorded
+    return string.format("%s|%s|%s|%s|%s|%s|%s",
         entry.tab or "MONEY",
-        entry.lineID or 0,
-        entry.player or "UNKNOWN",
-        entry.action or "??",
-        entry.item or entry.currency or entry.gold or "NONE",
-        entry.count or 0,
-        entry.amount or 0,
-    }, "|")
+        entry.player or "-",
+        entry.item or (entry.gold or 0),
+        entry.count or (entry.gold or 0),
+        entry.action or "-",
+        entry.scanLine or "-",
+        entry.extra or "-"
+    )
 end
 
--- Add an entry if it's new (persistent-safe)
+-- Add an entry if it's new
 local function AddEntry(entry)
     local key = MakeKey(entry)
 
     if GBL_SeenKeys[key] then
-        return false -- duplicate entry (already scanned)
+        return false -- duplicate entry
     end
 
     GBL_SeenKeys[key] = true
@@ -42,7 +43,7 @@ local function AddEntry(entry)
     return true
 end
 
--- Rebuild seen keys from saved data (prevents duplicates across sessions)
+-- Rebuild seen keys from saved data (persists across sessions)
 local function RebuildSeenKeys()
     GBL_SeenKeys = {}
     for _, entry in ipairs(GBL_Data) do
@@ -59,18 +60,17 @@ f:SetScript("OnEvent", function()
 end)
 
 ----------------------------------------------------------
--- Generate the full export string (tab-separated)
+-- Export
 ----------------------------------------------------------
 
 function GBL_ExportToCSV()
-    local text = "Player\tType\tGold_Dep_G\tGold_Dep_S\tGold_Dep_C\tGold_Wit_G\tGold_Wit_S\tGold_Wit_C\tItem\tCount\tTimestamp\tIndex\tTab\n"
+    local text = "Player\tType\tGold_Dep_G\tGold_Dep_S\tGold_Dep_C\tGold_Wit_G\tGold_Wit_S\tGold_Wit_C\tItem\tCount\tIndex\tTab\n"
 
     for _, entry in ipairs(GBL_Data) do
         local typeStr = "-"
         local gd, gs, gc, gw, ws, wc = 0, 0, 0, 0, 0, 0
         local itemName, count = "-", 0
 
-        -- Gold entries
         if entry.gold and entry.gold ~= 0 then
             typeStr = entry.action == "deposit" and "Gold Deposit" or "Gold Withdraw"
             local total = tonumber(entry.gold) or 0
@@ -83,8 +83,6 @@ function GBL_ExportToCSV()
             else
                 gw, ws, wc = gold_units, silver_units, copper_units
             end
-
-        -- Item entries
         elseif entry.item and entry.item ~= "" then
             typeStr = entry.action == "deposit" and "Item Deposit" or "Item Withdraw"
             itemName = entry.item
@@ -92,14 +90,13 @@ function GBL_ExportToCSV()
         end
 
         text = text .. string.format(
-            "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%d\t%s\n",
+            "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%d\t%s\n",
             entry.player or "-",
             typeStr,
             gd, gs, gc,
             gw, ws, wc,
             itemName,
             count,
-            entry.time or "-",
             entry.index or -1,
             entry.tab or "MONEY"
         )
@@ -110,16 +107,12 @@ function GBL_ExportToCSV()
 end
 
 ----------------------------------------------------------
--- Show scan confirmation
+-- Scan
 ----------------------------------------------------------
 
 local function PrintResult(tabName, newCount, skippedCount)
     print(string.format("GBL: %s scanned! %d new, %d skipped.", tabName, newCount, skippedCount))
 end
-
-----------------------------------------------------------
--- Scan current log
-----------------------------------------------------------
 
 local function ScanCurrentLog()
     if not GuildBankFrame or not GuildBankFrame:IsVisible() then
@@ -128,55 +121,44 @@ local function ScanCurrentLog()
     end
 
     local tab = GetCurrentGuildBankTab()
-    local tabName, logType
-    local newCount, skippedCount = 0, 0
+    local tabName, newCount, skippedCount = "", 0, 0
 
-    -- Money log
     if GuildBankFrame.mode == "moneylog" then
         tabName = "Money Log"
-        logType = "MONEY"
         local num = GetNumGuildBankMoneyTransactions()
         for i = 1, num do
             local type, name, amount, years, months, days, hours = GetGuildBankMoneyTransaction(i)
             if type and name then
                 local entry = {
                     tab = "MONEY",
-                    time = string.format("%04d-%02d-%02d %02d:00", years or 0, months or 0, days or 0, hours or 0),
                     player = name,
                     action = type,
-                    amount = amount or 0,
                     gold = amount or 0,
-                    lineID = i,
+                    scanLine = i
                 }
-
                 if AddEntry(entry) then newCount = newCount + 1 else skippedCount = skippedCount + 1 end
             end
         end
-
-    -- Tab/item logs
     else
-        tabName = GetGuildBankTabInfo(tab)
-        logType = "TAB"
+        tabName = GetGuildBankTabInfo(tab) or ("Tab"..tab)
         local num = GetNumGuildBankTransactions(tab)
         for i = 1, num do
-            local type, name, itemLink, count, tab1, tab2, year, month, day, hour = GetGuildBankTransaction(tab, i)
+            local type, name, itemLink, count, _, _, _, _, _, _ = GetGuildBankTransaction(tab, i)
             if type and name then
                 local entry = {
                     tab = "Tab"..tab,
-                    time = string.format("%04d-%02d-%02d %02d:00", year or 0, month or 0, day or 0, hour or 0),
                     player = name,
                     action = type,
                     item = itemLink,
                     count = count or 0,
-                    lineID = i,
+                    scanLine = i
                 }
-
                 if AddEntry(entry) then newCount = newCount + 1 else skippedCount = skippedCount + 1 end
             end
         end
     end
 
-    PrintResult(tabName or logType, newCount, skippedCount)
+    PrintResult(tabName, newCount, skippedCount)
 end
 
 ----------------------------------------------------------
@@ -238,4 +220,5 @@ SlashCmdList["GBL"] = function(msg)
         print("  /gbl export -> Show export window (copy CSV)")
     end
 end
+
 print("GuildBankLogger loaded! Type /gbl for commands.")
