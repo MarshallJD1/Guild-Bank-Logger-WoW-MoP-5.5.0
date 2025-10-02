@@ -1,8 +1,8 @@
 ## Interface: 50400
 ## Title: GuildBankLogger
 ## Notes: Logs guild bank deposits, withdrawals, and gold transactions
-## Version: 1.4
+## Version: 2.0
 ## Author: MarshallJD
-## SavedVariables: GBL_Data, GBL_Export, GBL_NextIndex
+## SavedVariables: GBL_Data, GBL_Export, GBL_NextIndex, GBL_Last20Markers
 
 GuildBankLogger.lua

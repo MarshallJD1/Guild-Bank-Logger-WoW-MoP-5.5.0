@@ -1,41 +1,47 @@
 -- ######################################################
--- GuildBankLogger (Fixed MoP Classic Deduplication)
+-- GuildBankLogger (MoP Classic: Robust Export + 20-Key Marker Deduplication)
 -- Logs guild bank deposits, withdrawals, and gold transactions
 -- ######################################################
 
--- Saved variables
 GBL_Data = GBL_Data or {}
 GBL_Export = GBL_Export or ""
 GBL_NextIndex = GBL_NextIndex or 1
-GBL_SeenKeys = GBL_SeenKeys or {} -- fast lookup for duplicates
+GBL_SeenKeys = GBL_SeenKeys or {}
+GBL_Last20Markers = GBL_Last20Markers or {}
 
 ----------------------------------------------------------
 -- Helpers
 ----------------------------------------------------------
 
--- Generate a unique key from actual transaction details
-local function MakeKey(entry)
-    -- Using tab, player, item/gold, count/amount, action, and scan line
-    -- Line number ensures multiple identical deposits are recorded
-    return string.format("%s|%s|%s|%s|%s|%s|%s",
-        entry.tab or "MONEY",
-        entry.player or "-",
-        entry.item or (entry.gold or 0),
-        entry.count or (entry.gold or 0),
-        entry.action or "-",
-        entry.scanLine or "-",
-        entry.extra or "-"
-    )
+-- Key construction: deduplication (strict) vs marker matching (stable)
+local function MakeKey(entry, forMarker)
+    if forMarker then
+        -- Use only stable fields (omit scanLine)
+        return string.format("%s|%s|%s|%s|%s",
+            entry.tab or "MONEY",
+            entry.player or "-",
+            entry.item or (entry.gold or 0),
+            entry.count or (entry.gold or 0),
+            entry.action or "-"
+        )
+    else
+        -- For deduplication, include scanLine for max strictness
+        return string.format("%s|%s|%s|%s|%s|%s",
+            entry.tab or "MONEY",
+            entry.player or "-",
+            entry.item or (entry.gold or 0),
+            entry.count or (entry.gold or 0),
+            entry.action or "-",
+            entry.scanLine or "-"
+        )
+    end
 end
 
--- Add an entry if it's new
 local function AddEntry(entry)
-    local key = MakeKey(entry)
-
+    local key = MakeKey(entry, false)
     if GBL_SeenKeys[key] then
-        return false -- duplicate entry
+        return false
     end
-
     GBL_SeenKeys[key] = true
     entry.index = GBL_NextIndex
     GBL_NextIndex = GBL_NextIndex + 1
@@ -43,63 +49,114 @@ local function AddEntry(entry)
     return true
 end
 
--- Rebuild seen keys from saved data (persists across sessions)
 local function RebuildSeenKeys()
     GBL_SeenKeys = {}
     for _, entry in ipairs(GBL_Data) do
-        local key = MakeKey(entry)
+        local key = MakeKey(entry, false)
         GBL_SeenKeys[key] = true
     end
 end
 
--- Automatically rebuild keys on login
-local f = CreateFrame("Frame")
-f:RegisterEvent("PLAYER_LOGIN")
-f:SetScript("OnEvent", function()
-    RebuildSeenKeys()
-end)
+local function GetLastNKeys(tab, N)
+    local marker = GBL_Last20Markers[tab]
+    if marker and #marker > 0 then
+        return marker
+    end
+    return {}
+end
+
+local function SetLastNKeys(tab, keys)
+    GBL_Last20Markers[tab] = keys
+end
+
+-- Find the marker sequence in the scanned log; require at least 10/20 in order
+local function FindMarkerInLog(markerKeys, scannedEntries)
+    local markerLen = #markerKeys
+    if markerLen == 0 then return 0 end
+    local minMatch = math.min(10, markerLen)
+    for i = 1, #scannedEntries - markerLen + 1 do
+        local matchCount = 0
+        for j = 1, markerLen do
+            if MakeKey(scannedEntries[i + j - 1], true) == markerKeys[j] then
+                matchCount = matchCount + 1
+            else
+                break
+            end
+        end
+        if matchCount >= minMatch then
+            return i + markerLen - 1
+        end
+    end
+    return nil
+end
 
 ----------------------------------------------------------
--- Export
+-- Export (full history, updates marker after export)
 ----------------------------------------------------------
 
 function GBL_ExportToCSV()
     local text = "Player\tType\tGold_Dep_G\tGold_Dep_S\tGold_Dep_C\tGold_Wit_G\tGold_Wit_S\tGold_Wit_C\tItem\tCount\tIndex\tTab\n"
 
+    local byTab = {}
     for _, entry in ipairs(GBL_Data) do
-        local typeStr = "-"
-        local gd, gs, gc, gw, ws, wc = 0, 0, 0, 0, 0, 0
-        local itemName, count = "-", 0
+        local tab = entry.tab or "MONEY"
+        byTab[tab] = byTab[tab] or {}
+        table.insert(byTab[tab], entry)
+    end
 
-        if entry.gold and entry.gold ~= 0 then
-            typeStr = entry.action == "deposit" and "Gold Deposit" or "Gold Withdraw"
-            local total = tonumber(entry.gold) or 0
-            local gold_units   = math.floor(total / 10000)
-            local silver_units = math.floor((total % 10000) / 100)
-            local copper_units = total % 100
+    for _, entries in pairs(byTab) do
+        table.sort(entries, function(a, b) return (a.index or 0) < (b.index or 0) end)
+    end
 
-            if entry.action == "deposit" then
-                gd, gs, gc = gold_units, silver_units, copper_units
-            else
-                gw, ws, wc = gold_units, silver_units, copper_units
+    local newMarkers = {}
+    for tab, entries in pairs(byTab) do
+        for _, entry in ipairs(entries) do
+            local typeStr = "-"
+            local gd, gs, gc, gw, ws, wc = 0, 0, 0, 0, 0, 0
+            local itemName, count = "-", 0
+
+            if entry.gold and entry.gold ~= 0 then
+                typeStr = entry.action == "deposit" and "Gold Deposit" or "Gold Withdraw"
+                local total = tonumber(entry.gold) or 0
+                local gold_units   = math.floor(total / 10000)
+                local silver_units = math.floor((total % 10000) / 100)
+                local copper_units = total % 100
+
+                if entry.action == "deposit" then
+                    gd, gs, gc = gold_units, silver_units, copper_units
+                else
+                    gw, ws, wc = gold_units, silver_units, copper_units
+                end
+            elseif entry.item and entry.item ~= "" then
+                typeStr = entry.action == "deposit" and "Item Deposit" or "Item Withdraw"
+                itemName = entry.item
+                count = entry.count or 0
             end
-        elseif entry.item and entry.item ~= "" then
-            typeStr = entry.action == "deposit" and "Item Deposit" or "Item Withdraw"
-            itemName = entry.item
-            count = entry.count or 0
-        end
 
-        text = text .. string.format(
-            "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%d\t%s\n",
-            entry.player or "-",
-            typeStr,
-            gd, gs, gc,
-            gw, ws, wc,
-            itemName,
-            count,
-            entry.index or -1,
-            entry.tab or "MONEY"
-        )
+            text = text .. string.format(
+                "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%d\t%s\n",
+                entry.player or "-",
+                typeStr,
+                gd, gs, gc,
+                gw, ws, wc,
+                itemName,
+                count,
+                entry.index or -1,
+                entry.tab or "MONEY"
+            )
+        end
+        -- After export, update last 20 marker for this tab (using marker keys!)
+        if #entries > 0 then
+            local keys = {}
+            for i = #entries, math.max(1, #entries - 19), -1 do
+                table.insert(keys, 1, MakeKey(entries[i], true))
+            end
+            newMarkers[tab] = keys
+        end
+    end
+
+    for tab, keys in pairs(newMarkers) do
+        SetLastNKeys(tab, keys)
     end
 
     GBL_Export = text
@@ -107,11 +164,14 @@ function GBL_ExportToCSV()
 end
 
 ----------------------------------------------------------
--- Scan
+-- Scan (NO marker update here!)
 ----------------------------------------------------------
 
-local function PrintResult(tabName, newCount, skippedCount)
+local function PrintResult(tabName, newCount, skippedCount, markerWarn)
     print(string.format("GBL: %s scanned! %d new, %d skipped.", tabName, newCount, skippedCount))
+    if markerWarn then
+        print("GBL: WARNING! Previous marker sequence not found in this log. Possible loss of entries due to log rollover.")
+    end
 end
 
 local function ScanCurrentLog()
@@ -121,44 +181,64 @@ local function ScanCurrentLog()
     end
 
     local tab = GetCurrentGuildBankTab()
-    local tabName, newCount, skippedCount = "", 0, 0
+    local tabKey, tabName, newCount, skippedCount = "", "", 0, 0
+    local markerWarn = false
+    local scannedEntries = {}
 
     if GuildBankFrame.mode == "moneylog" then
+        tabKey = "MONEY"
         tabName = "Money Log"
         local num = GetNumGuildBankMoneyTransactions()
         for i = 1, num do
             local type, name, amount, years, months, days, hours = GetGuildBankMoneyTransaction(i)
             if type and name then
                 local entry = {
-                    tab = "MONEY",
+                    tab = tabKey,
                     player = name,
                     action = type,
                     gold = amount or 0,
                     scanLine = i
                 }
-                if AddEntry(entry) then newCount = newCount + 1 else skippedCount = skippedCount + 1 end
+                table.insert(scannedEntries, entry)
             end
         end
     else
+        tabKey = "Tab"..tab
         tabName = GetGuildBankTabInfo(tab) or ("Tab"..tab)
         local num = GetNumGuildBankTransactions(tab)
         for i = 1, num do
             local type, name, itemLink, count, _, _, _, _, _, _ = GetGuildBankTransaction(tab, i)
             if type and name then
                 local entry = {
-                    tab = "Tab"..tab,
+                    tab = tabKey,
                     player = name,
                     action = type,
                     item = itemLink,
                     count = count or 0,
                     scanLine = i
                 }
-                if AddEntry(entry) then newCount = newCount + 1 else skippedCount = skippedCount + 1 end
+                table.insert(scannedEntries, entry)
             end
         end
     end
 
-    PrintResult(tabName, newCount, skippedCount)
+    -- Marker matching: Find where previous marker ends (using stable keys!)
+    local markerKeys = GetLastNKeys(tabKey, 20)
+    local markerEndIndex = FindMarkerInLog(markerKeys, scannedEntries)
+    if not markerEndIndex then
+        markerWarn = true
+        markerEndIndex = 0
+    end
+
+    for i = markerEndIndex + 1, #scannedEntries do
+        if AddEntry(scannedEntries[i]) then
+            newCount = newCount + 1
+        else
+            skippedCount = skippedCount + 1
+        end
+    end
+
+    PrintResult(tabName, newCount, skippedCount, markerWarn)
 end
 
 ----------------------------------------------------------
@@ -202,6 +282,17 @@ local function GBL_ShowExportWindow()
     GBL_ExportFrame.editBox:HighlightText()
     GBL_ExportFrame:Show()
 end
+
+----------------------------------------------------------
+-- On login: re-init
+----------------------------------------------------------
+
+local f = CreateFrame("Frame")
+f:RegisterEvent("PLAYER_LOGIN")
+f:SetScript("OnEvent", function()
+    RebuildSeenKeys()
+    GBL_Last20Markers = GBL_Last20Markers or {}
+end)
 
 ----------------------------------------------------------
 -- Slash command
