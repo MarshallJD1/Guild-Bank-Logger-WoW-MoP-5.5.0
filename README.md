@@ -16,7 +16,7 @@ Welcome to GuildBankLogger, a powerful, reliable tool to help your WoW guild tra
 
 ## Installation
 
-1. **Copy the files:**  
+1. **Copy the files from the .zip:**  
    - Place `GuildBankLogger.lua` and `GuildBankLogger.toc` in your `Interface/AddOns/GuildBankLogger` folder.
 2. **Enable the addon:**  
    - At character select, make sure GuildBankLogger is checked in AddOns.
